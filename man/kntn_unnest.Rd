@@ -7,11 +7,10 @@
 kntn_unnest(records)
 }
 \arguments{
-\item{records}{Data.frame retrived by kntn_records()}
+\item{records}{Data.frame retrieved by kntn_records()}
 }
 \description{
 The data retrieved by \link{kntn_records} may contain nested data.frames.
 \code{kntn_unnest()} unnests them by using \link[tidyr]{unnest}.
 Note that this function is very experimental and may not work well for all data.
 }
-

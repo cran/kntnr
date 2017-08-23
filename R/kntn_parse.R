@@ -6,7 +6,6 @@
 #'
 #' @param record List object converted from a single kintone record.
 #' @param records List objects converted from multiple kintone records.
-#' @param as Desired type of output: \code{data.frame} or \code{list}.
 #'
 #' @examples
 #' library(jsonlite)
@@ -22,137 +21,89 @@
 #' @seealso \url{https://developer.kintone.io/hc/en-us/articles/212494818/}
 NULL
 
-kntn_set_S3Class <- function(x) {
-  if(is.null(x$value) || length(x$value) == 0) {
-    x$value <- NA
-  }
-
-  structure(x$value,
-            class = c(x$type, class(x$value)))
-}
-
-#' @rdname kntn_parse
-#' @keywords internal
-kntn_parse_record <- function(record, as = c("data.frame", "list")) {
-  record <- record %>%
-    purrr::map(kntn_set_S3Class) %>%
-    purrr::map(kntn_parse_field)
-
-  if (match.arg(as) == "data.frame") dplyr::as_data_frame(record) else record
-}
-
 #' @rdname kntn_parse
 #' @keywords internal
 kntn_parse_records <- function(records) {
-  purrr::map_df(records, kntn_parse_record)
+  tibble::as_tibble(
+    purrr::map(purrr::transpose(records),
+               kntn_parse_col)
+  )
 }
 
 #' @rdname kntn_parse
 #' @keywords internal
-kntn_parse_field <- function(x) UseMethod("kntn_parse_field")
+kntn_parse_record <- function(record) {
+  kntn_parse_records(list(record))
+}
 
-#' @export
-kntn_parse_field.default      <- function(x) as.character(x)
+NESTED_TYPES <- c("CHECK_BOX", "MULTI_SELECT", "CATEGORY",
+                  "CREATOR", "MODIFIER",
+                  "USER_SELECT", "ORGANIZATION_SELECT", "GROUP_SELECT", "STATUS_ASSIGNEE",
+                  "FILE", "SUBTABLE")
 
-#' @export
-kntn_parse_field.__ID__       <- function(x) as.integer(x)
+#' @rdname kntn_parse
+#' @keywords internal
+kntn_parse_col <- function(x) {
+  x_transposed <- purrr::transpose(x)
 
-#' @export
-kntn_parse_field.__REVISION__ <- function(x) as.integer(x)
+  type <- unique(purrr::flatten_chr(x_transposed$type))
+  if(! type %in% NESTED_TYPES) {
+    # NULL cannot be treated as character.
+    x_transposed$value <- purrr::map_if(x_transposed$value, is.null, ~ NA_character_)
+    x_transposed$value <- purrr::flatten_chr(x_transposed$value)
+  }
 
-#' @export
-kntn_parse_field.NUMBER       <- function(x) as.numeric(x)
-
-# check is.na() to surpress warnings about conversion
-NA_Date <- as.Date(NA)
-NA_POSIXct <- as.POSIXct(NA)
-
-#' @export
-kntn_parse_field.DATE         <- function(x) lubridate::ymd(x, quiet = TRUE)
+  switch(type,
+         `__ID__`       = as.integer(x_transposed$value),
+         `__REVISION__` = as.integer(x_transposed$value),
+         NUMBER         = as.numeric(x_transposed$value),
+         DATE           = lubridate::ymd(x_transposed$value, quiet = TRUE),
+         DATETIME       = kntn_parse_datetime(x_transposed$value),
+         CREATED_TIME   = kntn_parse_datetime(x_transposed$value),
+         UPDATED_TIME   = kntn_parse_datetime(x_transposed$value),
+         TIME           = x_transposed$value, # TODO: R has no method to handle timestamp without date
+         CHECK_BOX      = kntn_wrap_with_list(x_transposed$value),
+         MULTI_SELECT   = kntn_wrap_with_list(x_transposed$value),
+         CATEGORY       = kntn_wrap_with_list(x_transposed$value),
+         CREATOR        = kntn_parse_single_user(x_transposed$value),
+         MODIFIER       = kntn_parse_single_user(x_transposed$value),
+         USER_SELECT    = kntn_parse_multi_user(x_transposed$value),
+         ORGANIZATION_SELECT = kntn_parse_multi_user(x_transposed$value),
+         GROUP_SELECT   = kntn_parse_multi_user(x_transposed$value),
+         STATUS_ASSIGNEE = kntn_parse_multi_user(x_transposed$value),
+         FILE           = kntn_parse_file(x_transposed$value),
+         SUBTABLE       = kntn_parse_subtable(x_transposed$value),
+         x_transposed$value)
+}
 
 kntn_parse_datetime <- function(x) {
-  if(is.na(x)) {
-    NA_POSIXct
-  } else {
-    lubridate::parse_date_time2(x, "YmdHMS", exact = TRUE)
-  }
+  lubridate::parse_date_time2(x, "YmdHMS", exact = TRUE)
 }
-
-#' @export
-kntn_parse_field.DATETIME     <- kntn_parse_datetime
-
-#' @export
-kntn_parse_field.CREATED_TIME <- kntn_parse_datetime
-
-#' @export
-kntn_parse_field.UPDATED_TIME <- kntn_parse_datetime
-
-# TODO: R has no method to handle timestamp without date
-#' @export
-kntn_parse_field.TIME         <- as.character
 
 kntn_wrap_with_list <- function(x) {
-  if(all(is.na(x))) {
-    list(character(0))
-  } else {
-    list(purrr::flatten_chr(x))
-  }
+  purrr::map(x, purrr::flatten_chr)
 }
 
-# wrap with list in order for dplyr to include in tbl_df
-#' @export
-kntn_parse_field.CHECK_BOX    <- kntn_wrap_with_list
-
-#' @export
-kntn_parse_field.MULTI_SELECT <- kntn_wrap_with_list
-
-#' @export
-kntn_parse_field.CATEGORY     <- kntn_wrap_with_list
-
-
-kntn_parse_single_user <- function(x) x$code %||% NA_character_
-
-#' @export
-kntn_parse_field.CREATOR      <- kntn_parse_single_user
-
-#' @export
-kntn_parse_field.MODIFIER     <- kntn_parse_single_user
+kntn_parse_single_user <- function(x) {
+  # NULL$code is NULL
+  purrr::map_chr(x, ~ .$code %||% NA_character_)
+}
 
 kntn_parse_multi_user <- function(x) {
-  if(all(is.na(x))) {
-    list(character(0))
-  } else {
-    list(purrr::map_chr(x, "code"))
-  }
+  purrr::map(x, ~ purrr::map_chr(., "code"))
 }
 
-#' @export
-kntn_parse_field.USER_SELECT  <- kntn_parse_multi_user
-
-#' @export
-kntn_parse_field.ORGANIZATION_SELECT <- kntn_parse_multi_user
-
-#' @export
-kntn_parse_field.GROUP_SELECT <- kntn_parse_multi_user
-
-#' @export
-kntn_parse_field.STATUS_ASSIGNEE <- kntn_parse_multi_user
-
-#' @export
-kntn_parse_field.FILE         <- function(x) {
-  if(all(is.na(x))) {
-    list(dplyr::data_frame())
-  } else {
-    list(dplyr::bind_rows(unclass(x)))
-  }
+kntn_parse_file <- function(x) {
+  purrr::map(x, dplyr::bind_rows)
 }
 
-#' @export
-kntn_parse_field.SUBTABLE     <- function(x) {
-  if(all(is.na(x))) {
-    list(dplyr::data_frame())
-  } else {
-    records <- purrr::map(x, "value")
-    list(kntn_parse_records(records))
-  }
+kntn_parse_subtable <- function(x) {
+  purrr::map(x, kntn_parse_subtable_one)
+}
+
+kntn_parse_subtable_one <- function(x) {
+  if(length(x) == 0) return(dplyr::data_frame())
+
+  x_trans <- purrr::transpose(x)
+  kntn_parse_records(x_trans$value)
 }

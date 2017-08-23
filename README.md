@@ -2,6 +2,7 @@ kntnr
 =====
 [![Travis-CI Build Status](https://travis-ci.org/yutannihilation/kntnr.svg?branch=master)](https://travis-ci.org/yutannihilation/kntnr)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/yutannihilation/kntnr?branch=master&svg=true)](https://ci.appveyor.com/project/yutannihilation/kntnr)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/kntnr)](https://cran.r-project.org/package=kntnr)
 
 Retrieve data from [kintone](https://www.kintone.com/) via its API. kintone is an enterprise application platform.
 
@@ -94,5 +95,5 @@ kntn_unnest(d)
 ```r
 d <- kntn_record(app, id = 1)
 
-f <- kntn_file(app, fileKey = x$Attachment[[1]]$fileKey[1])
+f <- kntn_file(fileKey = x$Attachment[[1]]$fileKey[1])
 ```
