@@ -1,9 +1,13 @@
 Package: kntnr
 Type: Package
 Title: R Client for 'kintone' API
-Version: 0.4.2
-Date: 2019-08-16
-Authors@R: person("Hiroaki", "Yutani", , "yutani.ini@gmail.com", c("aut", "cre"))
+Version: 0.4.3
+Authors@R: 
+    person(given = "Hiroaki",
+           family = "Yutani",
+           role = c("aut", "cre"),
+           email = "yutani.ini@gmail.com",
+           comment = c(ORCID = "0000-0002-3385-7233"))
 Description: Retrieve data from 'kintone' (<https://www.kintone.com/>) via its API.
     'kintone' is an enterprise application platform.
 License: MIT + file LICENSE
@@ -15,10 +19,10 @@ Imports: base64enc, dplyr (>= 0.7.0), httr, jsonlite, lubridate,
 Suggests: testthat
 LazyData: TRUE
 Encoding: UTF-8
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
 NeedsCompilation: no
-Packaged: 2019-08-24 03:33:25 UTC; hiroaki-yutani
-Author: Hiroaki Yutani [aut, cre]
+Packaged: 2020-03-29 09:47:28 UTC; yutani
+Author: Hiroaki Yutani [aut, cre] (<https://orcid.org/0000-0002-3385-7233>)
 Maintainer: Hiroaki Yutani <yutani.ini@gmail.com>
 Repository: CRAN
-Date/Publication: 2019-08-25 09:10:02 UTC
+Date/Publication: 2020-03-29 10:00:02 UTC
