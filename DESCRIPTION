@@ -1,7 +1,7 @@
 Package: kntnr
 Type: Package
 Title: R Client for 'kintone' API
-Version: 0.4.3
+Version: 0.4.4
 Authors@R: 
     person(given = "Hiroaki",
            family = "Yutani",
@@ -21,8 +21,8 @@ LazyData: TRUE
 Encoding: UTF-8
 RoxygenNote: 7.1.0
 NeedsCompilation: no
-Packaged: 2020-03-29 09:47:28 UTC; yutani
+Packaged: 2020-04-08 12:50:19 UTC; yutani
 Author: Hiroaki Yutani [aut, cre] (<https://orcid.org/0000-0002-3385-7233>)
 Maintainer: Hiroaki Yutani <yutani.ini@gmail.com>
 Repository: CRAN
-Date/Publication: 2020-03-29 10:00:02 UTC
+Date/Publication: 2020-04-08 13:10:02 UTC

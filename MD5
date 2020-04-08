@@ -1,10 +1,10 @@
-c2603d2090a4195358487e36f1fca212 *DESCRIPTION
+7b50385437f59b5543792a0dc9fa199d *DESCRIPTION
 df95a7e8348479c2ca67c8ba0725c5ac *LICENSE
 af589cfc8d6089cacfb0a7c3691be5a6 *NAMESPACE
-6dbb23538d613014a368783896f42c61 *NEWS.md
+56cff050bfbd46f2f71c4713122db530 *NEWS.md
 cb009ad2a1fcb4074c1a4a5005dbe091 *R/kntn_auth.R
 e9467a5512de1929ff37c477ef8f9789 *R/kntn_file.R
-0bb1b92de9c6754889662eee9de24490 *R/kntn_parse.R
+db8c1eb863bef09f78088ab1c267c172 *R/kntn_parse.R
 6beb3340371e32afab95e8c16623131b *R/kntn_record.R
 174445022bbccc5eacc6cb9417885f30 *R/kntn_unnest.R
 970146c717140215907d128cfb6151b7 *R/kntnr-package.R
@@ -23,6 +23,6 @@ bb808ea94e766a55751bf329df4d5f05 *inst/extdata/records.json
 caa51264547ad03b813f3acd77fd8961 *tests/testthat/test-auth.R
 20d532fb1140a2e83ee8a0a1e59b7b24 *tests/testthat/test-calc_ranges.R
 2495912b6ae5a9192c0873ddb7ddea5d *tests/testthat/test-guess_url.R
-1f9801e29e2e72409b8c31bfef79920d *tests/testthat/test-parse-field.R
+773f1e3bbf5ef73de22405179c0c54bc *tests/testthat/test-parse-field.R
 208401b30e03acdd78ac747d6cd91f11 *tests/testthat/test-parse-record.R
 84954d5debfbc8221e0382282e069456 *tests/testthat/test-strip_query.R
